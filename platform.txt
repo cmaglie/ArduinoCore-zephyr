@@ -227,20 +227,24 @@ tools.stm32flash.erase.pattern="{path}/{cmd}" {serial.port} -e 1024 -b 2400
 # DFU_UTIL
 #
 loader.version=XXXXXXX
+loader.dfuse=--dfuse-address={bootloader.address}
 upload.dfuse=--dfuse-address={upload.address}:leave
+
+upload.artifacts.sketch={build.path}/{build.project_name}.{upload.extension}
+upload.artifacts.loader={runtime.platform.path}/firmwares/{bootloader.file}
 
 tools.dfu-util.dfu.cmd={runtime.tools.dfu-util.path}/dfu-util
 tools.dfu-util.script.cmd={runtime.tools.scripting-tools.path}/scripting-tools
 tools.dfu-util.upload.params.verbose=-d
 tools.dfu-util.upload.params.quiet=
-tools.dfu-util.upload.loader.cmd="{dfu.cmd}" --device ,{bootloader.vid}:{bootloader.pid} -D "{runtime.platform.path}/firmwares/{bootloader.file}" -a{bootloader.interface} --dfuse-address={bootloader.address}
-tools.dfu-util.upload.sketch.cmd="{dfu.cmd}" --device ,{upload.vid}:{upload.pid} -D "{build.path}/{build.project_name}.{upload.extension}" -a{upload.interface} {upload.dfuse}
-tools.dfu-util.upload.pattern="{script.cmd}" if eq "v{upload.port.properties.configuration}" "v{loader.version}" {upload.loader.cmd} :: {upload.sketch.cmd}
+tools.dfu-util.upload.loader.cmd="{dfu.cmd}" --device ,{bootloader.vid}:{bootloader.pid} -D "{upload.artifacts.loader}" -a{bootloader.interface} {loader.dfuse}
+tools.dfu-util.upload.sketch.cmd="{dfu.cmd}" --device ,{upload.vid}:{upload.pid} -D "{upload.artifacts.sketch}" -a{upload.interface} {upload.dfuse}
+tools.dfu-util.upload.pattern="{script.cmd}" if not or eq "v{upload.port.properties.configuration}" "v" eq "v{upload.port.properties.configuration}" "v{loader.version}" {upload.loader.cmd} :: {upload.sketch.cmd}
 
 bootloader.dfuse=--dfuse-address={bootloader.address}:leave
 tools.dfu-util.bootloader.params.verbose=-d
 tools.dfu-util.bootloader.params.quiet=
-tools.dfu-util.bootloader.pattern="{dfu.cmd}" --device ,{bootloader.vid}:{bootloader.pid} -D "{runtime.platform.path}/firmwares/{bootloader.file}" -a{bootloader.interface} {bootloader.dfuse}
+tools.dfu-util.bootloader.pattern="{dfu.cmd}" --device ,{bootloader.vid}:{bootloader.pid} -D "{upload.artifacts.loader}" -a{bootloader.interface} {bootloader.dfuse}
 
 tools.dfu-util.erase.params.verbose=
 tools.dfu-util.erase.params.quiet=
